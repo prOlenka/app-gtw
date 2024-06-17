@@ -1,0 +1,63 @@
+spring:
+  application:
+    name:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/certs     #http://localhost:8080/realms/app-realm/protocol/openid-connect/certs
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin, RETAIN_LAST
+        - AddResponseHeader=Access-Control-Allow-Origin, *
+
+      routes:
+          - id: auth
+            uri: ${keycloak.auth-server-url}
+            predicates:
+              - Path=/openid-connect/**
+            filters:
+              - RewritePath=/openid-connect,/realms/${keycloak.realm}/protocol/openid-connect
+
+#          - id: external-auth
+#            uri: ${keycloak.external.auth-server-url}
+#            predicates:
+#              - Path=/api/external/openid-connect/**
+#            filters:
+#              - RewritePath=/api/external/openid-connect, /realms/${keycloak.external.realm}/protocol/openid-connect
+
+          - id: portal
+            uri: lb://portal
+            predicates:
+              - Path=/portal/**
+
+          - id: organization
+            uri: lb://organization
+            predicates:
+              - Path=/org/**
+
+          - id: nsi
+            uri: lb://nsi
+            predicates:
+              - Path=/nsi/**
+  main:
+    web-application-type: reactive
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+keycloak:
+  auth-server-url: http://localhost:8080
+  realm: app-realm
+  client: app-client
+  username: user1
+  password: password
+  auth-pass: http://localhost:8080/realms/app-realm/protocol/openid-connect/token
+server:
+  port: 8082
