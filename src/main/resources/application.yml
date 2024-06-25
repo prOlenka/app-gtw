@@ -1,6 +1,6 @@
 spring:
   application:
-    name:
+    name: gateway
   security:
     oauth2:
       resourceserver:
@@ -32,17 +32,25 @@ spring:
             predicates:
               - Path=/portal/**
 
-          - id: organization
-            uri: lb://organization
+          - id: driver
+            uri: lb://driver
             predicates:
-              - Path=/org/**
+              - Path=/drv/**
 
-          - id: nsi
-            uri: lb://nsi
+          - id: zakaz
+            uri: lb://zkz
             predicates:
-              - Path=/nsi/**
-  main:
-    web-application-type: reactive
+              - Path=/zkz/**
+
+          - id: dwh
+            uri: lb://dwh
+            predicates:
+              - Path=/dwh/**
+
+    discovery:
+      enabled: true
+#  main:
+#    web-application-type: reactive
 
 
 eureka:
